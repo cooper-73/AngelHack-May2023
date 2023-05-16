@@ -1,0 +1,65 @@
+file = open('input.txt', 'r')
+size = 5
+grid = []
+grid_scores = []
+
+def visualize(grid):
+    for row in grid[1: -1]:
+        for col in row[1: -1]:
+            print(col, end='')
+        print()
+    print("-------------")
+
+def apply_rule(center, top, bottom, left, right):
+    neighbors = f"{top}{bottom}{left}{right}"
+
+    if center == 'X':
+        if neighbors.count('X') == 1:
+            return 'X'
+        else:
+            return '.'
+    else:
+        if neighbors.count('X') == 1 or neighbors.count('X') == 2:
+            return 'X'
+        else:
+            return '.'
+        
+def calculate_score(grid):
+    score = 0
+    for i, row in enumerate(grid[1:-1]):
+        for j, ch in enumerate(row[1:-1]):
+            if ch == 'X':
+                score += (2 ** (i * size + j))
+    
+    return score
+
+def observe(grid):
+    grid_scores.append(calculate_score(grid))
+
+    while True:
+        grid_tmp = [ [ '.' for _ in range(size + 2)] for _ in range(size + 2) ]
+        for x in range(1, size + 1):
+            for y in range(1, size + 1):
+                grid_tmp[x][y] = apply_rule(
+                    grid[x][y],
+                    grid[x-1][y],
+                    grid[x+1][y],
+                    grid[x][y-1],
+                    grid[x][y+1])
+        grid = [ [ ch for ch in row] for row in grid_tmp ]
+        score = calculate_score(grid)
+        if grid_scores.count(score) == 1:
+            print(f'The lifeform score for the first layout that appears twice is {score}')
+            break
+        grid_scores.append(score)
+        # visualize(grid)
+
+grid.append([ '.' for _ in range(size + 2)])
+for line in file:
+    line = line.replace('\n', '')
+    grid.append(['.'] + [*line] + ['.'])
+grid.append([ '.' for _ in range(size + 2)])
+
+# visualize(grid)
+observe(grid)
+file.close()
